@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style>
+			* {
+				/* box-sizing: border-box; */
+			}
+
+			body {
+				margin: 0;
+			}
+
+			ul,
+			li {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+
+			.box {
+				position: absolute;
+				width: 400px;
+				height: 300px;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				border: 10px solid yellow;
+				overflow: hidden;
+			}
+
+			.items {
+				position: absolute;
+				left: 0;
+				width: 2800px;
+				letter-spacing: -1em;
+			}
+
+			.items>li {
+				/* position: absolute; */
+				display: inline-block;
+				width: 400px;
+				height: 300px;
+				line-height: 300px;
+				font-size: 32px;
+				text-align: center;
+				background-color: red;
+				letter-spacing: normal;
+				/* transition-duration: 0.2s; */
+				/* transform: translateX(400px); */
+			}
+
+			.items>li:first-child {
+				transform: translateX(0px);
+			}
+
+			.transition {
+				transition: 1.5s;
+			}
+
+			/* 			.items:hover{
+				left:-400px;
+			} */
+			.button {
+				position: absolute;
+				width: 75px;
+				height: 100%;
+			}
+
+			.button>img {
+				position: absolute;
+				width: 75px;
+				top: 50%;
+				transform: translateY(-50%);
+				cursor: pointer;
+			}
+
+			.left_btn {
+				left: 0;
+			}
+
+			.right_btn {
+				right: 0;
+			}
+
+			.circle {
+				position: absolute;
+				width: 100%;
+				height: 30px;
+				bottom: 10px;
+				/* background-color:blue; */
+			}
+
+			.circle>ul {
+				width: 175px;
+				float: right;
+				text-align: center;
+			}
+
+			.circle>ul>li {
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				background-color: gray;
+				display: inline-block;
+				cursor:pointer;
+			}
+			.circle>ul>li.cur{
+				background-color:blue;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box">
+			<ul class="items transition">
+				<li>1</li>
+				<li>2</li>
+				<li>3</li>
+				<li>4</li>
+				<li>5</li>
+			</ul>
+			<div class="button left_btn"><img class="" src="./left.png" /></div>
+			<div class="button right_btn"><img class="" src="./right.png" /></div>
+			<div class="circle">
+				<ul>
+					<li class="cur"></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+				</ul>
+			</div>
+		</div>
+		<script>
+			var box = document.getElementsByClassName("box")[0];
+			// 移动的对象
+			var moveTarget = document.getElementsByClassName("items")[0];
+
+			var item = moveTarget.getElementsByTagName("li");
+			// 未克隆之前的长度
+			var length = item.length;
+			// 获取小圆圈
+			var circleItem = document.querySelectorAll(".circle>ul>li");
+			// 在最后面添加第一个
+			moveTarget.appendChild(item[0].cloneNode(true));
+			// 在最前面添加最后一个
+			moveTarget.insertBefore(item[4].cloneNode(true), item[0]);
+
+			moveTarget.style.transform = "translate(-400px)";
+
+			var leftBtn = document.getElementsByClassName("left_btn")[0];
+			var rightBtn = document.getElementsByClassName("right_btn")[0];
+			// 信号量
+			var index = 1;
+			var isAnimate = true;
+			// 正常向右移动
+			function rightMove() {
+				if (isAnimate) {
+					moveTarget.classList.add("transition");
+					index++;
+					moveTarget.style.transform = "translateX(" + index * -400 + "px)";
+					isAnimate = false;
+					addCur(index);
+				}
+			}
+			// 向左移动
+			function leftMove() {
+				if (isAnimate) {
+					moveTarget.classList.add("transition");
+					index--;
+					moveTarget.style.transform = "translateX(" + index * -400 + "px)";
+					isAnimate = false;
+					addCur(index);
+				}
+			}
+			leftBtn.onclick = leftMove;
+			rightBtn.onclick = rightMove;
+			moveTarget.addEventListener("transitionend", function() {
+				// 因为前面多加一个的原因,所以这里要加一
+				if (index == length + 1) {
+					moveTarget.classList.remove("transition");
+					index = 1;
+					moveTarget.style.transform = "translateX(" + index * -400 + "px)";
+				}
+				if (index == 0) {
+					moveTarget.classList.remove("transition");
+					index = 5;
+					moveTarget.style.transform = "translateX(" + index * -400 + "px)";
+				}
+				isAnimate = true;
+			});
+
+			box.onmouseenter = function() {
+				clearInterval(timer);
+				console.log(1);
+			}
+			box.onmouseleave = function() {
+				timer = setInterval(rightMove, 2000);
+			}
+			// 巨坑巨坑巨坑巨坑 2000必须大于过渡时间
+			var timer = setInterval(rightMove, 2000);
+			// 小圆圈添加点击事件
+			for (let i = 0;i<circleItem.length;i++){
+				circleItem[i].onclick = function(){
+					for(var j = 0;j<circleItem.length;j++){
+						circleItem[j].className = "";
+					}
+					circleItem[i].classList.add("cur");
+					// 因为前面多加一个的原因,所以这里要加一
+					index = i + 1;
+					moveTarget.style.transform = "translateX(" + index * -400 + "px)";
+				}
+			}
+			function addCur(index){
+				for(var j = 0;j<circleItem.length;j++){
+					circleItem[j].className = "";
+				}
+				// ==5 1
+				// ==0 4
+				if (index == 6){
+					index = 0;
+				} else if (index == 0){
+					index = 4;
+				}else{
+					index = index -1;
+				}
+				circleItem[index].classList.add("cur");
+			}
+		</script>
+	</body>
+</html>
